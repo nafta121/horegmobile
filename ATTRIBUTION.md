@@ -30,8 +30,8 @@ HOREGDAW bundles no font files. It uses the default fonts shipped inside the `eg
 | `docs/brand/artcraft-mark.png` | ArtCraft Team | craftrules `assets/brand/` | ArtCraft brand terms |
 | `docs/brand/artcraft-mark-black.svg` | ArtCraft Team | craftrules `assets/brand/` | ArtCraft brand terms |
 | `docs/brand/artcraft-mark-black.png` | ArtCraft Team | craftrules `assets/brand/` | ArtCraft brand terms |
-| `assets/app-icon/icon.svg` | SoundCraft contributors | original (hand-placed SVG paths) | MIT OR Apache-2.0 |
-| `assets/app-icon/soundcraft-1024.png` | SoundCraft contributors | original, rendered from `icon.svg` | MIT OR Apache-2.0 |
-| `assets/app-icon/hicolor/` | SoundCraft contributors | original, rendered from `icon.svg` (16–512 px PNGs and the scalable SVG) | MIT OR Apache-2.0 |
-| `packaging/android/app/src/main/res/` | SoundCraft contributors | original, Android mipmap icons copied from `assets/app-icon/hicolor/` | MIT OR Apache-2.0 |
+| `assets/app-icon/icon.svg` | HOREGDAW contributors | original HOREGDAW app icon (SVG vector) | MIT OR Apache-2.0 |
+| `assets/app-icon/soundcraft-1024.png` | HOREGDAW contributors | original HOREGDAW app icon (1024×1024 RGBA PNG) | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/` | HOREGDAW contributors | original HOREGDAW app icon (16–512 px PNGs and scalable SVG) | MIT OR Apache-2.0 |
+| `packaging/android/app/src/main/res/` | HOREGDAW contributors | original HOREGDAW Android mipmap launcher icons (`mdpi`–`xxxhdpi`) | MIT OR Apache-2.0 |
 | `docs/images/` | SoundCraft contributors | screenshots rendered from the synthesised demo session | MIT OR Apache-2.0 |

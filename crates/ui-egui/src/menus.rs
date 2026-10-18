@@ -220,6 +220,11 @@ pub fn menu_bar(app: &mut SoundApp, ui: &mut egui::Ui) {
         ui,
         |ui| {
             egui::MenuBar::new().ui(ui, |ui| {
+                let (icon_rect, icon_resp) = ui.allocate_exact_size(egui::vec2(18.0, 18.0), egui::Sense::click());
+                crate::icons::draw(ui.painter(), icon_rect, "horegdaw", t.text);
+                if icon_resp.clicked() {
+                    app.ui.show_about = true;
+                }
                 ui.menu_button("HOREGDAW", |ui| {
                     if ui.button("About HOREGDAW").clicked() {
                         app.ui.show_about = true;

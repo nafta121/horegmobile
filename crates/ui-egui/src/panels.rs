@@ -609,10 +609,17 @@ fn about(app: &mut SoundApp, ctx: &egui::Context) {
             1 => crate::credits::contributors_ui(ui),
             2 => crate::credits::models_ui(ui),
             _ => {
-                ui.label(egui::RichText::new("HOREGDAW").font(bold(22.0)));
-                ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
-                ui.label("HOREGDAW Digital Audio Workstation (built on SoundCraft).");
-                ui.label("Dual-licensed MIT OR Apache-2.0. Made with Rust and egui.");
+                ui.horizontal(|ui| {
+                    let (icon_rect, _) = ui.allocate_exact_size(vec2(76.0, 76.0), egui::Sense::hover());
+                    crate::icons::draw(ui.painter(), icon_rect, "horegdaw", egui::Color32::WHITE);
+                    ui.add_space(10.0);
+                    ui.vertical(|ui| {
+                        ui.label(egui::RichText::new("HOREGDAW").font(bold(22.0)));
+                        ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
+                        ui.label("HOREGDAW Digital Audio Workstation (built on SoundCraft).");
+                        ui.label("Dual-licensed MIT OR Apache-2.0. Made with Rust and egui.");
+                    });
+                });
             }
         }
     });

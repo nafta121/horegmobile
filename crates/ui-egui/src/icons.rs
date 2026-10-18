@@ -171,6 +171,46 @@ pub fn draw(painter: &Painter, r: Rect, name: &str, c: Color32) {
                 painter.line_segment([p(r, x, 0.5 - h), p(r, x, 0.5 + h)], s);
             }
         }
+        "horegdaw" => {
+            let fg = Color32::from_rgb(150, 188, 183);
+            let bg = Color32::from_rgb(33, 43, 45);
+            let border = (r.width() * 0.036).max(1.0);
+            painter.rect_filled(r, r.width() * 0.094, fg);
+            painter.rect_filled(r.shrink(border), (r.width() * 0.063).max(1.0), bg);
+            let has_text = r.width() >= 48.0;
+            let g = if has_text {
+                r
+            } else {
+                // Center the H + soundwave emblem vertically when drawn at small toolbar/menu sizes
+                Rect::from_min_max(pos2(r.min.x, r.min.y - r.height() * 0.07), pos2(r.max.x, r.max.y + r.height() * 0.09))
+            };
+            for quad in [
+                [p(g, 0.064, 0.429), p(g, 0.086, 0.416), p(g, 0.086, 0.459), p(g, 0.064, 0.446)],
+                [p(g, 0.107, 0.395), p(g, 0.140, 0.372), p(g, 0.140, 0.505), p(g, 0.107, 0.482)],
+                [p(g, 0.174, 0.340), p(g, 0.213, 0.312), p(g, 0.213, 0.564), p(g, 0.174, 0.536)],
+                [p(g, 0.249, 0.247), p(g, 0.292, 0.216), p(g, 0.292, 0.707), p(g, 0.249, 0.707)],
+                [p(g, 0.332, 0.535), p(g, 0.415, 0.539), p(g, 0.317, 0.707), p(g, 0.249, 0.707)],
+                [p(g, 0.585, 0.539), p(g, 0.668, 0.535), p(g, 0.750, 0.707), p(g, 0.683, 0.707)],
+                [p(g, 0.706, 0.216), p(g, 0.750, 0.247), p(g, 0.750, 0.707), p(g, 0.706, 0.707)],
+                [p(g, 0.785, 0.312), p(g, 0.825, 0.340), p(g, 0.825, 0.536), p(g, 0.785, 0.564)],
+                [p(g, 0.859, 0.372), p(g, 0.891, 0.395), p(g, 0.891, 0.482), p(g, 0.859, 0.505)],
+                [p(g, 0.913, 0.416), p(g, 0.935, 0.429), p(g, 0.935, 0.446), p(g, 0.913, 0.459)],
+            ] {
+                painter.add(Shape::convex_polygon(quad.to_vec(), fg, Stroke::NONE));
+            }
+            painter.rect_filled(Rect::from_min_max(p(g, 0.332, 0.145), p(g, 0.415, 0.540)), 0.0, fg);
+            painter.rect_filled(Rect::from_min_max(p(g, 0.585, 0.145), p(g, 0.668, 0.540)), 0.0, fg);
+            painter.rect_filled(Rect::from_min_max(p(g, 0.410, 0.361), p(g, 0.590, 0.428)), 0.0, fg);
+            if has_text {
+                painter.text(
+                    p(r, 0.5, 0.815),
+                    egui::Align2::CENTER_CENTER,
+                    "HOREGDAW",
+                    crate::theme::bold(r.width() * 0.128),
+                    fg,
+                );
+            }
+        }
         _ => {
             painter.rect_stroke(r.shrink(r.width() * 0.25), 1.0, s, egui::StrokeKind::Middle);
         }
