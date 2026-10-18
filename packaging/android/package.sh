@@ -9,21 +9,38 @@ set -euo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/../env.sh"
 HERE="$ROOT/packaging/android"
 
-export CARGO_HOME="${CARGO_HOME:-/tmp/cargo}"
-export RUSTUP_HOME="${RUSTUP_HOME:-/tmp/rustup}"
-export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-/tmp/soundcraft-target}"
-export PATH="$CARGO_HOME/bin:$PATH"
+if ! command -v rustup >/dev/null 2>&1 && [ -x "/tmp/cargo/bin/rustup" ]; then
+  export CARGO_HOME="/tmp/cargo"
+  export RUSTUP_HOME="/tmp/rustup"
+  export PATH="$CARGO_HOME/bin:$PATH"
+fi
 
-export ANDROID_HOME="${ANDROID_HOME:-/tmp/android-sdk}"
+export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/tmp/android-sdk}}"
 NDK_VER="27.2.12479018"
 NDK_HOME="$ANDROID_HOME/ndk/$NDK_VER"
 BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.0"
 ANDROID_JAR="$ANDROID_HOME/platforms/android-35/android.jar"
 
-if [ ! -d "$NDK_HOME" ]; then
-  echo "==> Installing Android NDK $NDK_VER..."
-  yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-  "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$NDK_VER"
+SDKMANAGER=""
+if [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+  SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+elif command -v sdkmanager >/dev/null 2>&1; then
+  SDKMANAGER="$(command -v sdkmanager)"
+else
+  echo "==> Installing Android SDK command-line tools into $ANDROID_HOME..."
+  mkdir -p "$ANDROID_HOME/cmdline-tools"
+  curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -o /tmp/cmdtools.zip
+  unzip -q -o /tmp/cmdtools.zip -d "$ANDROID_HOME/cmdline-tools"
+  rm -rf "$ANDROID_HOME/cmdline-tools/latest"
+  mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+  rm -f /tmp/cmdtools.zip
+  SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+fi
+
+if [ ! -f "$ANDROID_JAR" ] || [ ! -d "$BUILD_TOOLS" ] || [ ! -d "$NDK_HOME" ]; then
+  echo "==> Installing Android SDK packages (platforms;android-35, build-tools;35.0.0, ndk;$NDK_VER)..."
+  yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
+  "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0" "ndk;$NDK_VER"
 fi
 
 rustup target add aarch64-linux-android
