@@ -84,8 +84,9 @@ pub fn rect([x0, y0, x1, y1]: [f32; 4]) -> Rect {
     Rect::from_min_max(pos2(x0, y0), pos2(x1, y1))
 }
 
-fn lane_rect(track: &Track, row: Rect, tl: Rect) -> Rect {
-    Rect::from_min_max(pos2(tl.min.x, row.min.y), pos2(tl.max.x, row.min.y + track.height.points()))
+pub(crate) fn lane_rect(track: &Track, row: Rect, tl: Rect) -> Rect {
+    let h = if track.view == "playlists" { track.height.points() } else { row.height() };
+    Rect::from_min_max(pos2(tl.min.x, row.min.y), pos2(tl.max.x, row.min.y + h))
 }
 
 pub fn x_of(s: &Session, tl: Rect, at: Samples) -> f32 {
@@ -289,7 +290,7 @@ fn main_area_content(app: &mut SoundApp, ui: &mut Ui) {
     }
 }
 
-fn in_edit_window(s: &Session, t: &Track) -> bool {
+pub(crate) fn in_edit_window(s: &Session, t: &Track) -> bool {
     ops::shown(s, t)
 }
 
@@ -337,7 +338,7 @@ pub(crate) fn click_track(app: &mut SoundApp, id: TrackId, mods: egui::Modifiers
     let _ = app.run("edit.select", json!({"tracks": ids}));
 }
 
-fn scroll_and_zoom(app: &mut SoundApp, ui: &Ui, area: Rect, tl: Rect) {
+pub(crate) fn scroll_and_zoom(app: &mut SoundApp, ui: &Ui, area: Rect, tl: Rect) {
     let (delta, zoom, pointer, scrolling) = ui.input(|i| (i.smooth_scroll_delta, i.zoom_delta(), i.pointer.hover_pos(), i.is_scrolling()));
     let mut swipe = if scrolling { app.edit_layout.swipe } else { egui::Vec2::ZERO };
     if swipe.max_elem() < 6.0 {
@@ -370,7 +371,7 @@ fn pan(app: &mut SoundApp, px: f64) {
     }
 }
 
-fn hscrollbar(app: &mut SoundApp, ui: &mut Ui, sb: Rect, tl: Rect) {
+pub(crate) fn hscrollbar(app: &mut SoundApp, ui: &mut Ui, sb: Rect, tl: Rect) {
     let t = Tokens::current();
     ui.painter().rect_filled(sb, 0.0, t.panel_bg);
     let s = app.engine.session();
@@ -1477,7 +1478,7 @@ pub(crate) fn track_context_menu(app: &mut SoundApp, ui: &mut Ui, id: TrackId) {
     });
 }
 
-fn grid_lines(painter: &egui::Painter, s: &Session, tl: Rect, lane: Rect) {
+pub(crate) fn grid_lines(painter: &egui::Painter, s: &Session, tl: Rect, lane: Rect) {
     let t = Tokens::current();
     let view = Range::new(sample_at(s, tl, tl.min.x).max(0), sample_at(s, tl, tl.max.x));
     let sr = s.sample_rate;
@@ -1554,7 +1555,7 @@ fn clip_preview_fades(clip: &Clip, gesture: Option<&Gesture>) -> (soundcraft_mod
 }
 
 /// The take `track` is recording, drawn in red as it grows, as in Pro Tools.
-fn draw_live_take(app: &SoundApp, painter: &egui::Painter, s: &Session, track: &Track, tl: Rect, lane: Rect) {
+pub(crate) fn draw_live_take(app: &SoundApp, painter: &egui::Painter, s: &Session, track: &Track, tl: Rect, lane: Rect) {
     let Some(rec) = &app.recorder else { return };
     let Some(take) = rec.live_take(track.id) else { return };
     let block_len = soundcraft_playback::record::LIVE_BLOCK as f64 * s.sample_rate.as_f64() / f64::from(rec.sample_rate.max(1));
@@ -1582,7 +1583,7 @@ fn grid_veil(line: Color32, bg: Color32) -> Color32 {
     }
 }
 
-fn draw_clip(app: &SoundApp, painter: &egui::Painter, s: &Session, track: &Track, clip: &Clip, tl: Rect, lane: Rect, dim: bool) {
+pub(crate) fn draw_clip(app: &SoundApp, painter: &egui::Painter, s: &Session, track: &Track, clip: &Clip, tl: Rect, lane: Rect, dim: bool) {
     let x0 = x_of(s, tl, clip.start);
     let x1 = x_of(s, tl, clip.end()).max(x0 + 1.0);
     let r = Rect::from_min_max(pos2(x0, lane.min.y + 1.0), pos2(x1, lane.max.y - 1.0));
@@ -1796,7 +1797,7 @@ fn crossfade_partner<'a>(track: &'a Track, clip: &Clip) -> Option<&'a Clip> {
     p.clips.get(i.checked_sub(1)?).filter(|c| c.end() > clip.start)
 }
 
-fn draw_automation(painter: &egui::Painter, s: &Session, track: &Track, p: &AutoParam, tl: Rect, lane: Rect) {
+pub(crate) fn draw_automation(painter: &egui::Painter, s: &Session, track: &Track, p: &AutoParam, tl: Rect, lane: Rect) {
     let t = Tokens::current();
     let (lo, hi, _) = p.range();
     let (lo, hi) = if matches!(p, AutoParam::Volume | AutoParam::SendLevel(_)) {
@@ -1936,7 +1937,7 @@ fn clip_gain_popup(ctx: &egui::Context, fader_bottom: Pos2, pos: f32) {
     p.text(pos2(panel.center().x, panel.min.y + 12.0), Align2::CENTER_CENTER, format!("{db:+.1}"), regular(10.5), t.counter_text);
 }
 
-fn lane_interaction(app: &mut SoundApp, ui: &mut Ui, track: &Track, lane: Rect, tl: Rect) {
+pub(crate) fn lane_interaction(app: &mut SoundApp, ui: &mut Ui, track: &Track, lane: Rect, tl: Rect) {
     let id = ui.id().with(("lane", track.id.0));
     let resp = ui.interact(lane, id, Sense::click_and_drag());
     // The clip menu is attached before the early return below: once the menu is open the pointer
@@ -2244,7 +2245,7 @@ fn fade_curve_drag_value(fade: soundcraft_model::Fade, anchor: (f32, f32), heigh
 }
 
 /// Runs before anything is painted, against the last frame's layout.
-fn drive_drag(app: &mut SoundApp, ctx: &egui::Context) {
+pub(crate) fn drive_drag(app: &mut SoundApp, ctx: &egui::Context) {
     if app.gesture.is_none() || matches!(app.gesture, Some(Gesture::Fader { .. })) {
         return;
     }
@@ -2591,7 +2592,7 @@ fn follow_update(
 /// timeline can be inspected anywhere during playback. Scrolling back to the
 /// playhead, stopping/starting, or re-selecting a scrolling mode resumes the
 /// follow. `none` and `after_playback` never scroll during playback.
-fn overlay(app: &mut SoundApp, ui: &mut Ui, tl: Rect, area: Rect) {
+pub(crate) fn overlay(app: &mut SoundApp, ui: &mut Ui, tl: Rect, area: Rect) {
     let t = Tokens::current();
     let mut scroll_to: Option<Samples> = None;
     let s = app.engine.session();

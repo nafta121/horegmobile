@@ -73,12 +73,11 @@ fn prefs_path() -> Option<PathBuf> {
 #[cfg(target_os = "android")]
 fn mobile_default_prefs() -> UiState {
     let mut ui = UiState::default();
-    // On phone screens in landscape, start with side lists collapsed, narrow mixer strips,
-    // and an 85% UI scale so the transport, timeline, and mixer fit comfortably.
+    ui.mobile_layout = true;
     ui.show_tracks_list = false;
     ui.show_clip_list = false;
     ui.narrow_mix = true;
-    ui.ui_scale = 0.85;
+    ui.ui_scale = 1.0;
     ui
 }
 

@@ -16,6 +16,7 @@ pub mod icons;
 pub mod menus;
 pub mod midi_editor;
 pub mod mix_window;
+pub mod mobile;
 pub mod ops_windows;
 pub mod palette;
 pub mod panels;
@@ -125,6 +126,12 @@ pub struct UiState {
     pub window_size: [f32; 2],
     pub window_maximized: bool,
     pub ui_scale: f32,
+    /// Cubasis 3–inspired mobile touch layout (enabled by default in runtime builds; off in unit tests).
+    pub mobile_layout: bool,
+    pub mobile_inspector_tab: u8,
+    pub mobile_inspector_open: bool,
+    pub mobile_media_open: bool,
+    pub mobile_row_height: f32,
 }
 
 impl Default for UiState {
@@ -185,6 +192,11 @@ impl Default for UiState {
             window_size: [1600.0, 1000.0],
             window_maximized: false,
             ui_scale: 1.0,
+            mobile_layout: !cfg!(test),
+            mobile_inspector_tab: 0,
+            mobile_inspector_open: false,
+            mobile_media_open: false,
+            mobile_row_height: 30.0,
         }
     }
 }
@@ -1217,16 +1229,20 @@ impl SoundApp {
         }
         shortcuts::handle(self, &ctx);
         self.sample_drop_targets.clear();
-        if !self.native_menu_bar {
-            menus::menu_bar(self, ui);
-        }
-        // With the Mix window in its own native window, the main window keeps Edit.
-        match if self.ui.mix_separate { MainWindow::Edit } else { self.ui.window } {
-            MainWindow::Edit => edit_window::show(self, ui),
-            MainWindow::Mix => mix_window::show(self, ui),
-        }
-        if self.ui.mix_separate {
-            mix_window::show_separate(self, &ctx);
+        if self.ui.mobile_layout {
+            mobile::show(self, ui);
+        } else {
+            if !self.native_menu_bar {
+                menus::menu_bar(self, ui);
+            }
+            // With the Mix window in its own native window, the main window keeps Edit.
+            match if self.ui.mix_separate { MainWindow::Edit } else { self.ui.window } {
+                MainWindow::Edit => edit_window::show(self, ui),
+                MainWindow::Mix => mix_window::show(self, ui),
+            }
+            if self.ui.mix_separate {
+                mix_window::show_separate(self, &ctx);
+            }
         }
         panels::floating(self, &ctx);
         windows::show(self, &ctx);

@@ -236,6 +236,12 @@ pub fn menu_bar(app: &mut SoundApp, ui: &mut egui::Ui) {
                         let _ = app.run("window.audio_health", json!({"value": true}));
                     }
                     ui.separator();
+                    let mut mobile = app.ui.mobile_layout;
+                    if ui.checkbox(&mut mobile, "Mobile UI (Cubasis Layout)").changed() {
+                        app.ui.mobile_layout = mobile;
+                        ui.close();
+                    }
+                    ui.separator();
                     if ui.button("Quit").clicked() {
                         let _ = crate::dialogs::run_or_ask(app, "app.quit", json!({}));
                     }
@@ -279,6 +285,33 @@ pub fn menu_bar(app: &mut SoundApp, ui: &mut egui::Ui) {
             });
         },
     );
+}
+
+pub(crate) fn full_menu_popup(app: &mut SoundApp, ui: &mut egui::Ui) {
+    let extra = ui_aliases();
+    for root in tree() {
+        ui.menu_button(&root.label, |ui| {
+            for c in &root.children {
+                menu_node(app, ui, c, &extra);
+                if c.path == "File > Open" {
+                    crate::recent::menu(app, ui);
+                }
+            }
+        });
+    }
+    ui.separator();
+    if ui.button("About HOREGDAW").clicked() {
+        app.ui.show_about = true;
+        ui.close();
+    }
+    if ui.button("Session Info").clicked() {
+        app.ui.show_session_info = true;
+        ui.close();
+    }
+    if ui.button("Switch to Classic Desktop Layout").clicked() {
+        app.ui.mobile_layout = false;
+        ui.close();
+    }
 }
 
 fn menu_node(app: &mut SoundApp, ui: &mut egui::Ui, n: &MenuNode, extra: &[(&str, &str)]) {
