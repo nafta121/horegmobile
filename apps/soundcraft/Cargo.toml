@@ -1,0 +1,53 @@
+[package]
+name = "soundcraft"
+description = "HOREGDAW desktop and Android native app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+default-run = "soundcraft"
+
+[lib]
+name = "horegdaw"
+path = "src/android.rs"
+crate-type = ["cdylib", "rlib"]
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[features]
+# ASIO audio devices on Windows (see soundcraft-playback's `asio` feature).
+asio = ["soundcraft-playback/asio"]
+
+[dependencies]
+soundcraft-engine.workspace = true
+soundcraft-ui-egui.workspace = true
+soundcraft-playback.workspace = true
+egui.workspace = true
+serde_json.workspace = true
+log.workspace = true
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "accesskit", "wayland", "x11", "links"] }
+
+[target.'cfg(not(any(target_arch = "wasm32", target_os = "android")))'.dependencies]
+rfd.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "android-native-activity", "links"] }
+winit = { version = "0.30", default-features = false, features = ["android-native-activity"] }
+
+[build-dependencies]
+# Icon + VERSIONINFO for soundcraft.exe; build.rs only uses it when the target is Windows.
+winresource = "0.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+muda = { version = "0.19.2", default-features = false }
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["NSApplication", "NSResponder"] }

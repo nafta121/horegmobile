@@ -1,0 +1,16 @@
+*~
+plan/
+/target
+/dist
+/corpus
+/log
+.DS_Store
+/.claude/
+/target-*/
+/craft-fonts/
+plans/
+.DS_Store
+/packaging/android/build/
+/packaging/android/app/build/
+/packaging/android/app/src/main/assets/
+/packaging/android/*.keystore

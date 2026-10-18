@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.horegdaw.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.horegdaw.app"
+        minSdk 26
+        targetSdk 35
+        versionCode 900
+        versionName "0.9.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("${project.rootDir}/horegdaw-release.keystore")
+            storePassword "horegdaw"
+            keyAlias "horegdaw"
+            keyPassword "horegdaw"
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ""
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    androidResources {
+        noCompress 'wasm', 'scraft', 'scraftz', 'wav', 'flac', 'ogg', 'mp3', 'mid'
+    }
+}
+
+dependencies {
+}
