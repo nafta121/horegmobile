@@ -1,6 +1,5 @@
-//! `cargo xtask <ci|layers|assets|parity|wasm>` — repository gates.
+//! `cargo xtask <ci|layers|assets|apk|version>` — HOREGDAW Android repository gates.
 
-mod ico;
 mod version;
 
 use std::path::{Path, PathBuf};
@@ -30,13 +29,12 @@ const LAYERS: &[(&str, u8)] = &[
     ("mix", 3),
     ("engine", 4),
     ("playback", 4),
-    ("automation", 5),
     ("ui-egui", 6),
 ];
 /// Standalone format crates: no workspace dependencies at all (publishable on their own).
 const STANDALONE: &[&str] = &["time", "audio-io", "midi", "video", "dsp"];
-const UI_CRATES: &[&str] = &["craft-ui", "egui", "eframe", "winit", "egui_kittest", "rfd", "egui-wgpu", "egui_glow"];
-const EXEMPT: &[&str] = &["soundcraft", "soundcraft-cli", "soundcraft-web", "xtask"];
+const UI_CRATES: &[&str] = &["craft-ui", "egui", "eframe", "winit", "egui_kittest", "egui-wgpu", "egui_glow"];
+const EXEMPT: &[&str] = &["horegdaw", "xtask"];
 
 fn layers() -> Result<(), String> {
     let out =
@@ -97,7 +95,6 @@ fn assets() -> Result<(), String> {
         if !ASSET_EXT.contains(&ext.as_str()) {
             continue;
         }
-        // Generated icon trees are covered by their directory row.
         let covered = attribution.contains(&format!("`{f}`"))
             || Path::new(f).ancestors().skip(1).any(|a| !a.as_os_str().is_empty() && attribution.contains(&format!("`{}/`", a.display())));
         if !covered {
@@ -112,46 +109,18 @@ fn assets() -> Result<(), String> {
     }
 }
 
-fn parity() -> Result<(), String> {
-    cargo(&["run", "-q", "-p", "soundcraft-cli", "--", "parity", "--write", "docs/parity-checklist.md"])
-}
-
-/// Crates that must compile for the web.
-const WASM: &[&str] = &[
-    "soundcraft-time",
-    "soundcraft-audio-io",
-    "soundcraft-midi",
-    "soundcraft-video",
-    "soundcraft-dsp",
-    "soundcraft-model",
-    "soundcraft-mix",
-    "soundcraft-engine",
-    "soundcraft-playback",
-    "soundcraft-automation",
-    "soundcraft-ui-egui",
-];
-
-fn wasm() -> Result<(), String> {
-    let mut args = vec!["check", "--target", "wasm32-unknown-unknown"];
-    for c in WASM {
-        args.push("-p");
-        args.push(c);
-    }
-    if root().join("apps/soundcraft-web/Cargo.toml").exists() {
-        args.push("-p");
-        args.push("soundcraft-web");
-    }
-    cargo(&args)
+fn apk() -> Result<(), String> {
+    let script = root().join("packaging/android/package.sh");
+    let st = Command::new("bash").arg(script).current_dir(root()).status().map_err(|e| e.to_string())?;
+    if st.success() { Ok(()) } else { Err("packaging/android/package.sh failed".into()) }
 }
 
 fn ci() -> Result<(), String> {
     let steps: Vec<(&str, Box<dyn Fn() -> Result<(), String>>)> = vec![
-        ("fmt", Box::new(|| cargo(&["fmt", "--all", "--", "--check"]))),
         ("clippy", Box::new(|| cargo(&["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]))),
         ("test", Box::new(|| cargo(&["test", "--workspace"]))),
         ("assets", Box::new(assets)),
         ("layers", Box::new(layers)),
-        ("wasm", Box::new(wasm)),
     ];
     let mut summary = Vec::new();
     for (name, f) in &steps {
@@ -174,11 +143,9 @@ fn main() -> ExitCode {
         Some("ci") => ci(),
         Some("layers") => layers(),
         Some("assets") => assets(),
-        Some("parity") => parity(),
-        Some("wasm") => wasm(),
+        Some("apk") => apk(),
         Some("version") => version::run(args.get(1..).unwrap_or(&[])),
-        Some("ico") => ico::run(args.get(1..).unwrap_or(&[])),
-        _ => Err("usage: cargo xtask <ci|layers|assets|parity|wasm|version>".into()),
+        _ => Err("usage: cargo xtask <ci|layers|assets|apk|version>".into()),
     };
     match r {
         Ok(()) => ExitCode::SUCCESS,

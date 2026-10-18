@@ -1,0 +1,33 @@
+[package]
+name = "horegdaw"
+description = "HOREGDAW native Android digital audio workstation (libhoregdaw.so)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+name = "horegdaw"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[dependencies]
+soundcraft-engine.workspace = true
+soundcraft-ui-egui.workspace = true
+soundcraft-playback.workspace = true
+egui.workspace = true
+serde_json.workspace = true
+log.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "android-native-activity", "links"] }
+winit = { version = "0.30", default-features = false, features = ["android-native-activity"] }

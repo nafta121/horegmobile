@@ -52,7 +52,7 @@ export AR_aarch64_linux_android="$TOOLCHAIN/llvm-ar"
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$TOOLCHAIN/aarch64-linux-android26-clang"
 
 echo "==> Building native Rust library libhoregdaw.so (aarch64-linux-android)..."
-cargo build --release --target aarch64-linux-android -p soundcraft --lib
+cargo build --release --target aarch64-linux-android -p horegdaw --lib
 
 SO_PATH="$CARGO_TARGET_DIR/aarch64-linux-android/release/libhoregdaw.so"
 "$TOOLCHAIN/llvm-strip" --strip-unneeded "$SO_PATH"
