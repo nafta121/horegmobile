@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v0.9.0)"
+        description: "Release tag (e.g. v1.0.0)"
         required: false
-        default: "v0.9.0"
+        default: "v1.0.0"
 
 permissions:
   contents: write
@@ -84,10 +84,11 @@ jobs:
           name: "HOREGDAW ${{ steps.meta.outputs.tag }} (Android APK)"
           body: |
             ## HOREGDAW ${{ steps.meta.outputs.version }} — Native Android Port
-            - **Package ID**: `com.horegdaw.app`
+            - **Package ID**: `com.horegdaw.app` (`versionCode` 10000, `versionName` `${{ steps.meta.outputs.version }}`)
             - **Architecture**: `arm64-v8a` (`aarch64-linux-android`, 16 KB page-aligned)
             - **Minimum Android**: Android 8.0+ (`API 26`), Target SDK `35`
-            - **Engine & UI**: Pure-Rust DAW engine (`soundcraft-engine`, `soundcraft-dsp`, `soundcraft-mix`), Android AAudio low-latency playback (`cpal`/`ndk`), and hardware-accelerated `egui`/`wgpu` UI optimized for landscape phone & tablet screens.
+            - **Mobile Touch UI/UX**: Cubasis 3–inspired touch interface with top transport & `Bars.Beats.Sub` counter, 15-button action/tool strip (`SEL`, `SPLIT`, `GLUE`, `ERASE`, `DRAW`, `MUTE`, `TRANSP`, `QUANT`, `1/16`, `STRETCH`, `UNDO`, `REDO`, `COPY`, `PASTE`, `# GRID`), collapsible left Track Inspector rail, numbered rainbow track headers, and full-bleed colored clips.
+            - **Engine**: Pure-Rust DAW engine (`soundcraft-engine`, `soundcraft-dsp`, `soundcraft-mix`), Android AAudio low-latency playback (`cpal`/`ndk`), and hardware-accelerated `egui`/`wgpu` rendering.
           files: |
             HOREGDAW.apk
             dist/release/HOREGDAW-*.apk

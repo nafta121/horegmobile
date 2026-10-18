@@ -90,13 +90,15 @@ echo "==> Compiling Android resources with aapt2..."
 "$BUILD_TOOLS/aapt2" compile --dir "$HERE/app/src/main/res" -o "$WORK/compiled_res/res.zip"
 
 echo "==> Linking resources into base APK..."
+IFS='.' read -r V_MAJ V_MIN V_PAT <<< "${VERSION%%-*}"
+VERSION_CODE=$(( ${V_MAJ:-1} * 10000 + ${V_MIN:-0} * 100 + ${V_PAT:-0} ))
 "$BUILD_TOOLS/aapt2" link \
   -I "$ANDROID_JAR" \
   --manifest "$HERE/app/src/main/AndroidManifest.xml" \
   --java "$WORK/gen" \
   --min-sdk-version 26 \
   --target-sdk-version 35 \
-  --version-code 900 \
+  --version-code "$VERSION_CODE" \
   --version-name "$VERSION" \
   -o "$WORK/unaligned.apk" \
   "$WORK/compiled_res/res.zip"
